@@ -1,0 +1,46 @@
+import glob
+import re
+
+configfile: "snakeconfig.json"
+
+JPRIME=config["jprime_call"]
+DLTRS=config["dltrs_call"]
+S = config["species_tree"]
+#S = "host5.tree"
+gamma_k = 1.5
+gamma_theta = 0.25
+seq_len = 1000
+files = "real/r.26 real/r.24 real/r.23 real/r.18 real/r.17 real/r.19 real/r.25 real/r.28 real/r.27".split()
+
+# För större gäst träd sätter vi -lowertime 0.4
+rule all:
+     input: expand("traces/{n}.trace", n = files),
+            expand("sim_data/{n}.pruned.tree", n = files)
+     
+rule gen_guest_tree:
+   output: expand("sim_data/{n}.pruned.tree", n = files),
+   	   expand("sim_data/{n}.pruned.leafmap", n = files),
+	   expand("sim_data/{n}.pruned.info", n = files)
+   run:
+       for i in files:
+           shell(JPRIME + " GuestTreeGen -nonrootrandomstart -lowertime 0.4 -min 5 -max 15 " + S + " 0.4 0.1 0.0 sim_data/"+i)
+
+rule relax_branches:
+     input: "sim_data/{n}.pruned.tree"
+     output: "sim_data/{n}.relaxed.tree"
+     shell: JPRIME + " BranchRelaxer {input} IIDGamma {gamma_k} {gamma_theta} -o {output}"
+
+rule seq_gen:
+    input: "sim_data/{n}.relaxed.tree"
+    output: "sim_data/{n}.sequences"
+    shell: "seq-gen -m HKY -l {seq_len} -of < {input} > {output}"
+
+rule run_dltrs:
+     input:
+         S,
+         "sim_data/{n}.sequences",
+         "sim_data/{n}.pruned.leafmap"
+     output:
+        "traces/{n}.trace"
+     shell:
+        DLTRS + " Delirious -o {output} -dmin 15 -dmax 200 -i 1000000 -t 100 -sm JC69 {input}"

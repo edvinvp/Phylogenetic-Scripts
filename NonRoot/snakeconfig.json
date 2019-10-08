@@ -1,0 +1,15 @@
+{
+    "n_iterations" : 1000000,
+    "thinning"   : 100,
+
+    "n_data_sets": 100,
+    "seq_lengths": [25, 50, 100, 200, 300, 400, 500],
+
+    "species_tree": "../real.newick",
+    "host4" : "host4.tree",
+    "host5" : "host5.tree",
+
+    "jprime_call": "java -jar ../../eclipse-workspace/jprime/target/jprime-0.3.7.jar",
+    "dltrs_call":  "java -Xms128m -Xmx256m -jar ../../eclipse-workspace/jprime/target/jprime-0.3.7.jar"
+}
+

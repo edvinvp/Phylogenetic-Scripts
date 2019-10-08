@@ -1,2 +1,2 @@
 # Phylogenetic Scripts
-Collection of python scripts used for analyzing phylogenetic data and generating plots. Used in my bachelor thesis.
+Collection of python scripts and the data used for phylogenetic analysis in my bachelor thesis. 
